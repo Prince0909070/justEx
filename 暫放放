@@ -1,3 +1,4 @@
+//non-dense
 #include <iostream>
 #include <cstdlib>  // 用於 rand() 和 srand()
 #include <ctime>    // 用於 time() 和 clock()
