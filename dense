@@ -1,0 +1,154 @@
+//dense
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+struct Node {
+    int coef;
+    int exp;
+    Node* next;
+};
+
+Node* createNode(int coef, int exp) {
+    Node* newNode = new Node();
+    newNode->coef = coef;
+    newNode->exp = exp;
+    newNode->next = nullptr;
+    return newNode;
+}
+
+void insertNode(Node*& head, int coef, int exp) {
+    Node* newNode = createNode(coef, exp);
+    if (!head || head->exp < exp) {
+        newNode->next = head;
+        head = newNode;
+    } else {
+        Node* temp = head;
+        while (temp->next && temp->next->exp >= exp) {
+            temp = temp->next;
+        }
+        newNode->next = temp->next;
+        temp->next = newNode;
+    }
+}
+
+void displayPolynomial(Node* head) {
+    if (!head) {
+        cout << "0" << endl;
+        return;
+    }
+    Node* temp = head;
+    bool first = true;
+    while (temp) {
+        if (temp->coef > 0 && !first) {
+            cout << "+";
+        }
+        cout << temp->coef;
+        if (temp->exp > 0) {
+            cout << "x";
+            if (temp->exp > 1) {
+                cout << "^" << temp->exp;
+            }
+        }
+        temp = temp->next;
+        first = false;
+    }
+    cout << endl;
+}
+
+Node* manualInputPolynomial(int terms) {
+    Node* head = nullptr;
+    for (int i = 0; i < terms; ++i) {
+        cout << "輸入第 " << (i + 1) << " 項的 coef 和 exp: ";
+        int coef, exp;
+        cin >> coef >> exp;
+        insertNode(head, coef, exp);
+    }
+    return head;
+}
+
+Node* generateDensePolynomial(int terms) {
+    Node* head = nullptr;
+    for (int i = terms - 1; i >= 0; --i) {
+        insertNode(head, 1, i);  // coef = 1, exp = terms - i - 1
+    }
+    return head;
+}
+
+Node* multiplyPolynomials(Node* poly1, Node* poly2) {
+    Node* result = nullptr;
+    for (Node* p1 = poly1; p1; p1 = p1->next) {
+        for (Node* p2 = poly2; p2; p2 = p2->next) {
+            int newCoef = p1->coef * p2->coef;
+            int newExp = p1->exp + p2->exp;
+            Node* temp = result;
+            Node* prev = nullptr;
+            while (temp && temp->exp > newExp) {
+                prev = temp;
+                temp = temp->next;
+            }
+            if (temp && temp->exp == newExp) {
+                temp->coef += newCoef;
+            } else {
+                Node* newNode = createNode(newCoef, newExp);
+                if (!prev) {
+                    newNode->next = result;
+                    result = newNode;
+                } else {
+                    newNode->next = temp;
+                    prev->next = newNode;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+int main() {
+    int m, n;
+    Node *poly1 = nullptr, *poly2 = nullptr;
+
+    // 輸入第一個多項式
+    while (true) {
+        cout << "輸入第一個多項式的項數 m: ";
+        cin >> m;
+        if (m > 0) break;
+        cout << "項數必須大於 0!" << endl;
+    }
+    if (m < 10) {
+        poly1 = manualInputPolynomial(m);
+    } else {
+        poly1 = generateDensePolynomial(m);
+    }
+    cout << "poly1 = ";
+    displayPolynomial(poly1);
+
+    // 輸入第二個多項式
+    while (true) {
+        cout << "輸入第二個多項式的項數 n: ";
+        cin >> n;
+        if (n > 0) break;
+        cout << "項數必須大於 0!" << endl;
+    }
+    if (n < 10) {
+        poly2 = manualInputPolynomial(n);
+    } else {
+        poly2 = generateDensePolynomial(n);
+    }
+    cout << "poly2 = ";
+    displayPolynomial(poly2);
+
+    // 計算相乘時間
+    clock_t start = clock();
+    Node* result = multiplyPolynomials(poly1, poly2);
+    clock_t end = clock();
+
+    cout << "相乘結果: ";
+    displayPolynomial(result);
+
+    double duration = double(end - start) / CLOCKS_PER_SEC;
+    cout << "執行時間: " << duration << " 秒" << endl;
+
+    return 0;
+}
