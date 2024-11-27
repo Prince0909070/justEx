@@ -1,0 +1,160 @@
+//non-dense
+#include <iostream>
+#include <cstdlib>  // 用於 rand() 和 srand()
+#include <ctime>    // 用於 time() 和 clock()
+using namespace std;
+
+struct Node {
+    int coef;   
+    int exp;    
+    Node* next; // 指向下一個節點的指標
+};
+
+// 建立新的節點函數
+Node* createNode(int coef, int exp) {
+    Node* newNode = new Node(); // 建立一個新的節點
+    newNode->coef = coef;       // 設定係數
+    newNode->exp = exp;         // 設定指數
+    newNode->next = NULL;       // 初始化下一個節點為空
+    return newNode;             // 回傳新節點
+}
+
+// 將節點按降冪順序插入鏈結串列
+void insertNode(Node*& head, int coef, int exp) {
+    Node* newNode = createNode(coef, exp);
+
+    if (!head || head->exp < exp) { // 插入到鏈結串列的頭部
+        newNode->next = head;
+        head = newNode;
+    } else { // 插入到鏈結串列的中間或尾部
+        Node* temp = head;
+        while (temp->next && temp->next->exp >= exp) {
+            temp = temp->next;
+        }
+        newNode->next = temp->next;
+        temp->next = newNode;
+    }
+}
+
+// 顯示多項式函數
+void displayPolynomial(Node* head) {
+    if (!head) {
+        cout << "0"; // 如果串列為空，顯示 0
+        return;
+    }
+    Node* temp = head;
+    bool first = true; // 用於控制首項不顯示 "+"
+    while (temp) {
+        if (temp->coef > 0 && !first) {
+            cout << "+";
+        }
+        cout << temp->coef;
+        if (temp->exp != 0) { // 若指數不為 0，顯示 x 和次方
+            cout << "x^" << temp->exp;
+        }
+        temp = temp->next;
+        first = false; // 首項輸出完畢後，設定為非首項
+    }
+    cout << endl;
+}
+
+// 手動輸入多項式函數
+Node* manualInputPolynomial(int terms) {
+    Node* head = NULL; // 初始化多項式的頭節點
+    int count = 0;     // 記錄輸入的項數
+    while (count < terms) {
+        cout << "輸入第 " << (count + 1) << " 項的coef和exp: ";
+        int coef, exp;
+        cin >> coef >> exp;
+        insertNode(head, coef, exp); // 按降冪順序插入節點
+        count++;
+    }
+    return head;
+}
+
+// 隨機生成多項式函數
+Node* randomInputPolynomial(int terms) {
+    Node* head = NULL;
+    srand(time(0)); // 設定隨機數種子
+    for (int i = 0; i < terms; ++i) {
+        int coef = rand() % 11;      // 隨機生成係數 (0 到 10)
+        int exp = rand() % 10001;    // 隨機生成指數 (0 到 10000)
+        insertNode(head, coef, exp); // 按降冪順序插入節點
+    }
+    return head;
+}
+
+// 多項式輸入控制函數
+Node* inputPolynomial(int terms) {
+    if (terms <= 10) {
+        cout << "項數 <= 10，請手動輸入每一項的coef和exp" << endl;
+        return manualInputPolynomial(terms);
+    } else {
+        cout << "項數 > 10，將隨機生成每一項的coef和exp" << endl;
+        return randomInputPolynomial(terms);
+    }
+}
+
+// 多項式相乘函數
+Node* multiplyPolynomials(Node* poly1, Node* poly2) {
+    Node* result = NULL; // 結果多項式的頭節點
+
+    // 使用兩個迴圈遍歷兩個多項式的每一項
+    for (Node* p1 = poly1; p1; p1 = p1->next) {
+        for (Node* p2 = poly2; p2; p2 = p2->next) {
+            int newCoef = p1->coef * p2->coef;  // 計算新係數
+            int newExp = p1->exp + p2->exp;    // 計算新指數
+
+            // 將新項目加入結果多項式
+            Node* temp = result;
+            Node* prev = NULL;
+            while (temp && temp->exp > newExp) {
+                prev = temp;
+                temp = temp->next;
+            }
+            if (temp && temp->exp == newExp) {
+                temp->coef += newCoef; // 如果指數相同，合併項目
+            } else {
+                Node* newNode = createNode(newCoef, newExp);
+                if (!prev) { // 插入到串列的開頭
+                    newNode->next = result;
+                    result = newNode;
+                } else { // 插入到串列中間或尾部
+                    newNode->next = temp;
+                    prev->next = newNode;
+                }
+            }
+        }
+    }
+    return result; 
+}
+
+int main() {
+    int m, n;
+    
+    cout << "輸入第一個多項式的項數 m: ";
+    cin >> m;
+    Node* poly1 = inputPolynomial(m);
+    cout << "poly1 = ";
+    displayPolynomial(poly1);
+
+    cout << "輸入第二個多項式的項數 n: ";
+    cin >> n;
+    Node* poly2 = inputPolynomial(n);
+    cout << "poly2 = ";
+    displayPolynomial(poly2);
+
+    // 計算執行時間
+    clock_t start = clock();
+    Node* result = multiplyPolynomials(poly1, poly2);
+    clock_t end = clock();
+
+    cout << "相乘結果 poly1 * poly2 = ";
+    displayPolynomial(result);
+
+    // 輸出執行時間
+    double duration = double(end - start) / CLOCKS_PER_SEC;
+    cout << "執行時間: " << duration << " 秒" << endl;
+
+    return 0;
+}
