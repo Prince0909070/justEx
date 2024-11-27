@@ -86,8 +86,8 @@ Node* randomInputPolynomial(int terms) {
 
 // 多項式輸入控制函數
 Node* inputPolynomial(int terms) {
-    if (terms <= 10) {
-        cout << "項數 <= 10，請手動輸入每一項的coef和exp" << endl;
+    if (terms < 10) {
+        cout << "項數 < 10，請手動輸入每一項的coef和exp" << endl;
         return manualInputPolynomial(terms);
     } else {
         cout << "項數 > 10，將隨機生成每一項的coef和exp" << endl;
