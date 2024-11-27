@@ -1,87 +1,99 @@
-//dense
 #include <iostream>
-#include <cstdlib>
-#include <ctime>
+#include <cstdlib> // 用於生成隨機數
+#include <ctime>   // 用於計算執行時間
 using namespace std;
 
+// 節點結構，用於表示多項式中的一項
 struct Node {
-    int coef;
-    int exp;
-    Node* next;
+    int coef;      // 項的係數
+    int exp;       // 項的指數
+    Node* next;    // 指向下一個節點的指標
 };
 
+// 建立新節點函數
 Node* createNode(int coef, int exp) {
-    Node* newNode = new Node();
-    newNode->coef = coef;
-    newNode->exp = exp;
-    newNode->next = nullptr;
-    return newNode;
+    Node* newNode = new Node(); // 動態分配記憶體創建新節點
+    newNode->coef = coef;       // 設定節點的係數
+    newNode->exp = exp;         // 設定節點的指數
+    newNode->next = nullptr;    // 初始化指標為空，表示無下一個節點
+    return newNode;             // 回傳新建的節點
 }
 
+// 將節點按降冪順序插入鏈結串列
 void insertNode(Node*& head, int coef, int exp) {
-    Node* newNode = createNode(coef, exp);
+    Node* newNode = createNode(coef, exp); // 創建新節點
+    // 如果鏈結串列為空或新節點的指數大於第一個節點的指數，將新節點插入到頭部
     if (!head || head->exp < exp) {
-        newNode->next = head;
-        head = newNode;
+        newNode->next = head; // 新節點指向原來的頭部
+        head = newNode;       // 更新頭部為新節點
     } else {
+        // 否則找到合適的位置插入
         Node* temp = head;
         while (temp->next && temp->next->exp >= exp) {
-            temp = temp->next;
+            temp = temp->next; // 移動到下一個節點
         }
-        newNode->next = temp->next;
-        temp->next = newNode;
+        newNode->next = temp->next; // 新節點指向當前節點的下一個節點
+        temp->next = newNode;       // 當前節點指向新節點
     }
 }
 
+// 顯示多項式
 void displayPolynomial(Node* head) {
-    if (!head) {
+    if (!head) { // 如果多項式為空，顯示 0
         cout << "0" << endl;
         return;
     }
     Node* temp = head;
-    bool first = true;
+    bool first = true; // 標記是否為首項，用於控制 "+" 號
     while (temp) {
         if (temp->coef > 0 && !first) {
-            cout << "+";
+            cout << "+"; // 非首項且係數為正時添加 "+"
         }
-        cout << temp->coef;
-        if (temp->exp > 0) {
-            cout << "x";
+        cout << temp->coef; // 輸出係數
+        if (temp->exp > 0) { // 若指數大於 0
+            cout << "x"; // 輸出變數 x
             if (temp->exp > 1) {
-                cout << "^" << temp->exp;
+                cout << "^" << temp->exp; // 輸出次方，當指數大於 1 時
             }
         }
-        temp = temp->next;
-        first = false;
+        temp = temp->next; // 移動到下一個節點
+        first = false;     // 首項已輸出，設為 false
     }
     cout << endl;
 }
 
+// 手動輸入多項式
 Node* manualInputPolynomial(int terms) {
-    Node* head = nullptr;
+    Node* head = nullptr; // 初始化鏈結串列為空
     for (int i = 0; i < terms; ++i) {
         cout << "輸入第 " << (i + 1) << " 項的 coef 和 exp: ";
         int coef, exp;
-        cin >> coef >> exp;
-        insertNode(head, coef, exp);
+        cin >> coef >> exp;         // 輸入係數和指數
+        insertNode(head, coef, exp); // 插入節點到鏈結串列
     }
-    return head;
+    return head; // 回傳頭節點
 }
 
+// 自動生成密集多項式
 Node* generateDensePolynomial(int terms) {
-    Node* head = nullptr;
+    Node* head = nullptr; // 初始化鏈結串列為空
     for (int i = terms - 1; i >= 0; --i) {
-        insertNode(head, 1, i);  // coef = 1, exp = terms - i - 1
+        insertNode(head, 1, i); // 生成固定係數 1，指數遞減的項
     }
-    return head;
+    return head; // 回傳頭節點
 }
 
+// 多項式相乘
 Node* multiplyPolynomials(Node* poly1, Node* poly2) {
-    Node* result = nullptr;
+    Node* result = nullptr; // 結果多項式初始化為空
+    // 遍歷 poly1 的每一項
     for (Node* p1 = poly1; p1; p1 = p1->next) {
+        // 遍歷 poly2 的每一項
         for (Node* p2 = poly2; p2; p2 = p2->next) {
-            int newCoef = p1->coef * p2->coef;
-            int newExp = p1->exp + p2->exp;
+            int newCoef = p1->coef * p2->coef; // 計算新係數
+            int newExp = p1->exp + p2->exp;   // 計算新指數
+
+            // 找到結果多項式中對應的位置插入或更新
             Node* temp = result;
             Node* prev = nullptr;
             while (temp && temp->exp > newExp) {
@@ -89,64 +101,65 @@ Node* multiplyPolynomials(Node* poly1, Node* poly2) {
                 temp = temp->next;
             }
             if (temp && temp->exp == newExp) {
-                temp->coef += newCoef;
+                temp->coef += newCoef; // 如果指數相同，更新係數
             } else {
-                Node* newNode = createNode(newCoef, newExp);
-                if (!prev) {
+                Node* newNode = createNode(newCoef, newExp); // 創建新節點
+                if (!prev) { // 插入到結果多項式的頭部
                     newNode->next = result;
                     result = newNode;
-                } else {
+                } else { // 插入到結果多項式的中間或尾部
                     newNode->next = temp;
                     prev->next = newNode;
                 }
             }
         }
     }
-    return result;
+    return result; // 回傳結果多項式
 }
 
 int main() {
     int m, n;
     Node *poly1 = nullptr, *poly2 = nullptr;
 
-    // 輸入第一個多項式
+    // 輸入第一個多項式的項數
     while (true) {
         cout << "輸入第一個多項式的項數 m: ";
         cin >> m;
-        if (m > 0) break;
+        if (m > 0) break; // 檢查 m 是否大於 0
         cout << "項數必須大於 0!" << endl;
     }
-    if (m < 10) {
-        poly1 = manualInputPolynomial(m);
+    if (m <= 10) {
+        poly1 = manualInputPolynomial(m); // 手動輸入多項式
     } else {
-        poly1 = generateDensePolynomial(m);
+        poly1 = generateDensePolynomial(m); // 自動生成密集多項式
     }
     cout << "poly1 = ";
-    displayPolynomial(poly1);
+    displayPolynomial(poly1); // 顯示第一個多項式
 
-    // 輸入第二個多項式
+    // 輸入第二個多項式的項數
     while (true) {
         cout << "輸入第二個多項式的項數 n: ";
         cin >> n;
-        if (n > 0) break;
+        if (n > 0) break; // 檢查 n 是否大於 0
         cout << "項數必須大於 0!" << endl;
     }
-    if (n < 10) {
-        poly2 = manualInputPolynomial(n);
+    if (n <= 10) {
+        poly2 = manualInputPolynomial(n); // 手動輸入多項式
     } else {
-        poly2 = generateDensePolynomial(n);
+        poly2 = generateDensePolynomial(n); // 自動生成密集多項式
     }
     cout << "poly2 = ";
-    displayPolynomial(poly2);
+    displayPolynomial(poly2); // 顯示第二個多項式
 
-    // 計算相乘時間
-    clock_t start = clock();
-    Node* result = multiplyPolynomials(poly1, poly2);
-    clock_t end = clock();
+    // 計算多項式相乘的時間
+    clock_t start = clock(); // 開始計時
+    Node* result = multiplyPolynomials(poly1, poly2); // 執行多項式相乘
+    clock_t end = clock(); // 結束計時
 
     cout << "相乘結果: ";
-    displayPolynomial(result);
+    displayPolynomial(result); // 顯示相乘結果
 
+    // 輸出執行時間
     double duration = double(end - start) / CLOCKS_PER_SEC;
     cout << "執行時間: " << duration << " 秒" << endl;
 
