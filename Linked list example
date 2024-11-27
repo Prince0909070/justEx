@@ -1,0 +1,50 @@
+#include <iostream>
+using namespace std;
+
+// 定義節點結構
+struct Node {
+    int data;          // 資料
+    Node* next;        // 指向下一個節點的指標
+};
+
+// 函數：新增節點到鏈結串列的尾端
+void appendNode(Node*& head, int value) {
+    Node* newNode = new Node(); // 建立新節點
+    newNode->data = value;      // 設定資料
+    newNode->next = nullptr;    // 尾節點指向 nullptr
+
+    if (head == nullptr) {      // 如果串列是空的
+        head = newNode;         // 新節點成為頭節點
+    } else {
+        Node* temp = head;      // 從頭開始找到尾節點
+        while (temp->next != nullptr) {
+            temp = temp->next;
+        }
+        temp->next = newNode;   // 將新節點連接到尾節點
+    }
+}
+
+// 函數：列印鏈結串列的內容
+void printList(Node* head) {
+    Node* temp = head;
+    while (temp != nullptr) {   // 循環直到尾節點
+        cout << temp->data << " -> ";
+        temp = temp->next;
+    }
+    cout << "nullptr" << endl;
+}
+
+int main() {
+    Node* head = nullptr;       // 初始化鏈結串列的頭節點為空
+
+    // 插入節點
+    appendNode(head, 10);
+    appendNode(head, 20);
+    appendNode(head, 30);
+
+    // 列印鏈結串列
+    cout << "鏈結串列內容：" << endl;
+    printList(head);
+
+    return 0;
+}
