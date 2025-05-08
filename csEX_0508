@@ -2,10 +2,8 @@
 using namespace std;
 
 class Car {
-protected:
-string m_DriveMode;
-
 private:
+string m_DriveMode;
 int m_MaxSeating;
 int m_price;
 void m_UpdatePrice(int base=500000){
@@ -33,6 +31,9 @@ public:
     int get_Price() {
         return m_price;
     }
+		string get_DriveMode(){
+			return m_DriveMode;
+		}
 };
 
 class BMW_Car : public Car{
