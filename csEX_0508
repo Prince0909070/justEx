@@ -68,6 +68,21 @@ class Audi_Car : public Car{
 	}
 };
 
+class BENZ_Car : public Car{
+	private:
+	string m_DriveMode;
+
+	public:
+	BENZ_Car(string y, int z, int s) : Car("BENZ", y, z, s){
+	cout << "Constructing BENZ_Car\n";
+	m_DriveMode = "Front-wheel";
+	}
+
+	string get_DriveMode(){
+		return m_DriveMode;
+	}
+};
+
 int main() {
     Car car_1("BMW", "X5", 2023, 6);
     Car car_2("Audi", "A1", 2021, 2);
